@@ -6,10 +6,16 @@ import (
 	"sync"
 )
 
+var (
+	ErrEmptyKey     = errors.New("key cannot be empty")
+	ErrAlreadyExist = errors.New("key already exist")
+	ErrKeyNotFound  = errors.New("key does not exist")
+)
+
 func main() {
 
 	// create a new data store
-	ds := NewDataStore()
+	ds := NewDataStore[string]()
 	total := 100
 	for i := range total {
 		err := ds.Insert(fmt.Sprintf("key-%d", i), fmt.Sprintf("val-%d", i))
@@ -33,24 +39,19 @@ func main() {
 	fmt.Println("total items in the data store: ", count)
 }
 
-type DataStore struct {
+// Generic DataStore with any string keys, and generic values
+type DataStore[V any] struct {
 	mu    sync.RWMutex
-	store map[string]string
+	store map[string]V
 }
 
-func NewDataStore() *DataStore {
-	return &DataStore{
-		store: make(map[string]string),
+func NewDataStore[V any]() *DataStore[V] {
+	return &DataStore[V]{
+		store: make(map[string]V),
 	}
 }
 
-var (
-	ErrEmptyKey     = errors.New("key cannot be empty")
-	ErrAlreadyExist = errors.New("key already exist")
-	ErrKeyNotFound  = errors.New("key does not exist")
-)
-
-func (ds *DataStore) Insert(key, value string) error {
+func (ds *DataStore[V]) Insert(key string, value V) error {
 
 	if key == "" {
 		return ErrEmptyKey
@@ -67,10 +68,11 @@ func (ds *DataStore) Insert(key, value string) error {
 	return ErrAlreadyExist
 }
 
-func (ds *DataStore) Read(key string) (string, error) {
+func (ds *DataStore[V]) Read(key string) (V, error) {
+	var zero V
 
 	if key == "" {
-		return "", ErrEmptyKey
+		return zero, ErrEmptyKey
 	}
 
 	ds.mu.RLock()
@@ -79,10 +81,10 @@ func (ds *DataStore) Read(key string) (string, error) {
 		return val, nil
 	}
 
-	return "", ErrKeyNotFound
+	return zero, ErrKeyNotFound
 }
 
-func (ds *DataStore) Remove(key string) error {
+func (ds *DataStore[V]) Remove(key string) error {
 
 	if key == "" {
 		return ErrEmptyKey
@@ -99,7 +101,7 @@ func (ds *DataStore) Remove(key string) error {
 	return ErrKeyNotFound
 }
 
-func (ds *DataStore) Count() int {
+func (ds *DataStore[V]) Count() int {
 	ds.mu.RLock()
 	defer ds.mu.RUnlock()
 	return len(ds.store)
