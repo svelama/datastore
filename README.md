@@ -6,6 +6,6 @@ A simple thread-safe, key-value store implementation in Go with support for mult
 
 ## Implementation Files
 
-- `/basic/data-store.go` - Basic mutex-based implementation
-- `/multiple-storage-backends/data-store.go` - Repository interface and DataStore implementation
-- `/multiple-storage-backends/map-repository.go` - Map-based repository implementation
+- [`/basic/data-store.go`](https://github.com/svelama/datastore/blob/main/basic/data-store.go) - Basic mutex-based implementation
+- [`/multiple-storage-backends/data-store.go`](https://github.com/svelama/datastore/blob/main/multiple-storage-backends/data-store.go) - Repository interface and DataStore implementation
+- [`/multiple-storage-backends/map-repository.go`](https://github.com/svelama/datastore/blob/main/multiple-storage-backends/map-repository.go) - Map-based repository implementation
